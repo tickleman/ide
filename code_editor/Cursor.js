@@ -51,6 +51,14 @@ class Cursor
 	visible = false
 
 	/**
+	 * Move cursor to the begin of the current line
+	 */
+	beginOfLine()
+	{
+		this.moveTo(0, this.row)
+	}
+
+	/**
 	 * Clear timeout handler and prepare the next one
 	 *
 	 * @example blink('hide') ; blink('show')
@@ -93,6 +101,14 @@ class Cursor
 		metrics.top    = (this.row * editor.metrics.line_height) + editor.top
 
 		this.show()
+	}
+
+	/**
+	 * Move the cursor to the end of the current line
+	 */
+	endOfLine()
+	{
+		this.moveTo(this.editor.lines[this.row] ? this.editor.displayedLine(this.row).length : 0, this.row)
 	}
 
 	/**

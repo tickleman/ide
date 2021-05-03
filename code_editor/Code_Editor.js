@@ -1,4 +1,6 @@
+import Actions  from './Actions.js'
 import Cursor   from './Cursor.js'
+import Keymap   from './Keymap.js'
 import Metrics  from './Metrics.js'
 import Paper    from './Paper.js'
 import Settings from './Settings.js'
@@ -7,9 +9,9 @@ class Code_Editor
 {
 
 	/**
-	 * @type string
+	 * @type Actions
 	 */
-	code = ''
+	actions
 
 	/**
 	 * @type Cursor
@@ -17,9 +19,19 @@ class Code_Editor
 	cursor
 
 	/**
+	 * @type Keymap
+	 */
+	keymap
+
+	/**
 	 * @type number
 	 */
 	left = 0
+
+	/**
+	 * @type string[]
+	 */
+	lines = []
 
 	/**
 	 * @type Metrics
@@ -47,14 +59,24 @@ class Code_Editor
 	 */
 	constructor(container)
 	{
-		if (container === undefined) container = document
+		if (container === undefined) {
+			container = document
+		}
 		this.paper = (container === document)
 			? new Paper(container.getElementsByTagName('canvas')[0], container.getElementsByTagName('img'))
 			: new Paper(container.querySelectorAll('canvas')[0], container.querySelectorAll('img'))
 		this.paper.draw = () => { this.draw() }
-		this.settings   = new Settings()
-		this.metrics    = new Metrics(this)
-		this.cursor     = new Cursor(this)
+
+		this.actions  = new Actions(this)
+		this.keymap   = new Keymap(this)
+		this.settings = new Settings()
+		this.metrics  = new Metrics(this)
+		this.cursor   = new Cursor(this)
+	}
+
+	displayedLine(number)
+	{
+		return this.lines[number].replace("\t", this.metrics.tab_string)
 	}
 
 	draw()
@@ -69,13 +91,11 @@ class Code_Editor
 		pen.font          = this.metrics.font
 		pen.textBaseline  = 'top'
 
-		const lines       = this.code.split("\n")
-		let   line_number = Math.round(this.top / metrics.line_height)
-		let   top         = line_number * metrics.line_height - this.top
+		let line_number = Math.round(this.top / metrics.line_height)
+		let top         = line_number * metrics.line_height - this.top
 
-		while ((line_number < lines.length) && (top < paper.height)) {
-			const line = lines[line_number].replace("\t", metrics.tab_string)
-			pen.fillText(line, -this.left, top)
+		while ((line_number < this.lines.length) && (top < paper.height)) {
+			pen.fillText(this.displayedLine(line_number), -this.left, top)
 			line_number ++
 			top += metrics.line_height
 		}
