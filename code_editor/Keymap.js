@@ -17,8 +17,14 @@ class Keymap
 		'ArrowLeft':  'cursor.left',
 		'ArrowRight': 'cursor.right',
 		'ArrowUp':    'cursor.up',
-		'End':        'cursor.endOfLine',
-		'Home':       'cursor.beginOfLine'
+
+		'Ctrl+ArrowLeft':  'cursor.previousWord',
+		'Ctrl+ArrowRight': 'cursor.nextWord',
+		'Ctrl+End':        'cursor.endOfFile',
+		'Ctrl+Home':       'cursor.beginOfFile',
+
+		'End':  'cursor.endOfLine',
+		'Home': 'cursor.beginOfLine',
 	}
 
 	/**
@@ -27,12 +33,23 @@ class Keymap
 	bind()
 	{
 		document.addEventListener('keydown', (event) => {
-			if (this.map.hasOwnProperty(event.key)) {
-				let binding = this.editor.actions.binding;
-				for (let action of this.map[event.key].split('.')) {
-					binding = binding[action]
+			let key = event.key
+			if (event.altKey)  key = 'Alt+'  + key
+			if (event.ctrlKey) key = 'Ctrl+' + key
+			if (this.map.hasOwnProperty(key)) {
+				let binding  = this.editor.actions.binding
+				let callable = this.editor
+				let object   = this.editor
+				for (let action of this.map[key].split('.')) {
+					if (binding !== undefined) {
+						binding = binding[action]
+					}
+					if (callable !== undefined) {
+						object   = callable
+						callable = object[action]
+					}
 				}
-				binding.call()
+				binding ? binding.call() : callable.call(object)
 			}
 		})
 	}

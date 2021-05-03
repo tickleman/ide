@@ -76,7 +76,8 @@ class Code_Editor
 
 	displayedLine(number)
 	{
-		return this.lines[number].replace("\t", this.metrics.tab_string)
+		const line = this.lines[number]
+		return (line === undefined) ? '' : line.replace("\t", this.metrics.tab_string)
 	}
 
 	draw()

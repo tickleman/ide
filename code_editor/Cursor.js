@@ -51,7 +51,15 @@ class Cursor
 	visible = false
 
 	/**
-	 * Move cursor to the begin of the current line
+	 * Move the cursor to the begin of the file
+	 */
+	beginOfFile()
+	{
+		this.moveTo(0, 0)
+	}
+
+	/**
+	 * Move the cursor to the begin of the current line
 	 */
 	beginOfLine()
 	{
@@ -86,6 +94,14 @@ class Cursor
 	}
 
 	/**
+	 * Move the cursor down
+	 */
+	down()
+	{
+		this.move(0, 1)
+	}
+
+	/**
 	 * Calculates new metrics and draw cursor at its new place (after having hidden it at its old place)
 	 */
 	draw()
@@ -104,11 +120,42 @@ class Cursor
 	}
 
 	/**
+	 * Move the cursor to the end of the file
+	 */
+	endOfFile()
+	{
+		this.row = this.editor.lines.length - 1
+		this.endOfLine()
+	}
+
+	/**
 	 * Move the cursor to the end of the current line
 	 */
 	endOfLine()
 	{
-		this.moveTo(this.editor.lines[this.row] ? this.editor.displayedLine(this.row).length : 0, this.row)
+		this.moveTo(this.editor.displayedLine(this.row).length, this.row)
+	}
+
+	/**
+	 * Hide the cursor (until the next blink delay)
+	 */
+	hide()
+	{
+		if (this.visible) {
+			const metrics = this.metrics
+			this.editor.paper.pen.putImageData(this.backup, metrics.left, metrics.top)
+			this.visible = false
+		}
+
+		this.blink('show')
+	}
+
+	/**
+	 * Move the cursor left
+	 */
+	left()
+	{
+		this.move(-1, 0)
 	}
 
 	/**
@@ -136,17 +183,78 @@ class Cursor
 	}
 
 	/**
-	 * Hide the cursor (until the next blink delay)
+	 * Move the cursor until the next word
 	 */
-	hide()
+	nextWord()
 	{
-		if (this.visible) {
-			const metrics = this.metrics
-			this.editor.paper.pen.putImageData(this.backup, metrics.left, metrics.top)
-			this.visible = false
-		}
+		const text   = this.editor.displayedLine(this.row)
+		const char   = text[this.column]
+		let   column = this.column + 1
+		const skips  = this.skippedLetters(char)
 
-		this.blink('show')
+		for (let skip of skips) {
+			while ((column < text.length) && (skip.indexOf(text[column]) > -1)) {
+				column ++
+			}
+		}
+		if (column > text.length) {
+			this.moveTo(0, this.row + 1)
+		}
+		else {
+			this.moveTo(column, this.row)
+		}
+	}
+
+	/**
+	 * Move the cursor until the previous word
+	 */
+	previousWord()
+	{
+		let   text   = this.editor.displayedLine(this.row)
+		let   column = this.column - 1
+		const char   = text[column]
+		const skips  = this.skippedLetters(char)
+
+		for (let skip of skips) {
+			while ((column > 0) && (skip.indexOf(text[column - 1]) > -1)) {
+				column --
+			}
+		}
+		if (column < 0) {
+			text = this.editor.displayedLine(this.row - 1)
+			this.moveTo(text.length, this.row - 1)
+		}
+		else {
+			this.moveTo(column, this.row)
+		}
+	}
+
+	/**
+	 * Move the cursor right
+	 */
+	right()
+	{
+		this.move(1, 0)
+	}
+
+	/**
+	 * Which letters are skipped when this character is under the cursor on next / previous word move
+	 *
+	 * @param char string
+	 * @returns string[]
+	 */
+	skippedLetters(char)
+	{
+		if (char === ' ') {
+			return [' ']
+		}
+		if ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(char) > -1) {
+			return ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz']
+		}
+		if ('abcdefghijklmnopqrstuvwxyz'.indexOf(char) > -1) {
+			return ['abcdefghijklmnopqrstuvwxyz']
+		}
+		return []
 	}
 
 	/**
@@ -166,6 +274,14 @@ class Cursor
 		}
 
 		this.blink('hide')
+	}
+
+	/**
+	 * Move the cursor up
+	 */
+	up()
+	{
+		this.move(0, -1)
 	}
 
 }
