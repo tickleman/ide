@@ -1,5 +1,7 @@
-import Paper    from './Paper.js';
-import Settings from './Settings.js';
+import Cursor   from './Cursor.js'
+import Metrics  from './Metrics.js'
+import Paper    from './Paper.js'
+import Settings from './Settings.js'
 
 class Code_Editor
 {
@@ -10,9 +12,19 @@ class Code_Editor
 	code = ''
 
 	/**
+	 * @type Cursor
+	 */
+	cursor
+
+	/**
 	 * @type number
 	 */
 	left = 0
+
+	/**
+	 * @type Metrics
+	 */
+	metrics
 
 	/**
 	 * @type Paper
@@ -22,7 +34,7 @@ class Code_Editor
 	/**
 	 * @type Settings
 	 */
-	settings = new Settings
+	settings
 
 	/**
 	 * @type number
@@ -40,33 +52,35 @@ class Code_Editor
 			? new Paper(container.getElementsByTagName('canvas')[0], container.getElementsByTagName('img'))
 			: new Paper(container.querySelectorAll('canvas')[0], container.querySelectorAll('img'))
 		this.paper.draw = () => { this.draw() }
+		this.settings   = new Settings()
+		this.metrics    = new Metrics(this)
+		this.cursor     = new Cursor(this)
 	}
 
 	draw()
 	{
+		const metrics = this.metrics
 		const paper   = this.paper
 		const pen     = paper.pen
 		pen.fillStyle = this.settings.color.paper
 		pen.fillRect(0, 0, paper.width, paper.height)
 
-		pen.fillStyle     = this.settings.color.default;
-		pen.font          = this.settings.font.size.toString() + 'px ' + this.settings.font.family
+		pen.fillStyle     = this.settings.color.default
+		pen.font          = this.metrics.font
 		pen.textBaseline  = 'top'
 
-		const font_height    = pen.getFontHeight('Q')
-		const line_separator = Math.round(this.settings.line_separator * font_height)
-		const line_height    = font_height + line_separator
-		const lines          = this.code.split("\n")
-		const tab_string     = ' '.repeat(this.settings.tab_size)
-		let   line_number    = Math.round(this.top / line_height)
-		let   top            = line_number * line_height - this.top
+		const lines       = this.code.split("\n")
+		let   line_number = Math.round(this.top / metrics.line_height)
+		let   top         = line_number * metrics.line_height - this.top
 
 		while ((line_number < lines.length) && (top < paper.height)) {
-			const line = lines[line_number].replace("\t", tab_string)
+			const line = lines[line_number].replace("\t", metrics.tab_string)
 			pen.fillText(line, -this.left, top)
 			line_number ++
-			top += line_height
+			top += metrics.line_height
 		}
+
+		this.cursor.draw()
 	}
 
 }

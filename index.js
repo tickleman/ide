@@ -6,20 +6,12 @@ editor.code = document.documentElement.innerHTML
 
 document.addEventListener('keydown', (event) =>
 {
-	if (event.key === Key.DOWN) {
-		editor.top ++
-		editor.draw()
-	}
-	if (event.key === Key.LEFT && editor.left > 0) {
-		editor.left --
-		editor.draw()
-	}
-	if (event.key === Key.RIGHT) {
-		editor.left ++
-		editor.draw()
-	}
-	if (event.key === Key.UP && editor.top > 0) {
-		editor.top --
-		editor.draw()
+	switch (event.key) {
+		case Key.DOWN:  editor.cursor.move(0, 1)  ; break
+		case Key.LEFT:  editor.cursor.move(-1, 0) ; break
+		case Key.RIGHT: editor.cursor.move(1, 0)  ; break
+		case Key.UP:    editor.cursor.move(0, -1) ; break
 	}
 })
+
+window.editor = editor

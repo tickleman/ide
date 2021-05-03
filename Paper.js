@@ -1,4 +1,4 @@
-import extendPen from './CanvasRenderingContext2D.js';
+import extendPen from './CanvasRenderingContext2D.js'
 
 class Paper
 {
