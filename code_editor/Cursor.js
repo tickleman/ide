@@ -29,6 +29,13 @@ class Cursor
 	handler
 
 	/**
+	 * Characters recognized as letters, that group into words
+	 *
+	 * @type string
+	 */
+	letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_'
+
+	/**
 	 * Cursor metrics, into the canvas, in pixels (horizontal may be floats, vertical are always integers)
 	 *
 	 * @type number{}
@@ -110,11 +117,12 @@ class Cursor
 
 		const editor  = this.editor
 		const metrics = this.metrics
+		const margin  = editor.settings.margin
 
 		metrics.height = editor.metrics.letter_height + 2
+		metrics.left   = margin.left + editor.left + (this.column * (editor.metrics.letter_width + editor.metrics.letter_spacing))
+		metrics.top    = margin.top + editor.top  + (this.row * editor.metrics.line_height)
 		metrics.width  = 2
-		metrics.left   = (this.column * (editor.metrics.letter_width + editor.metrics.letter_spacing)) - editor.left
-		metrics.top    = (this.row * editor.metrics.line_height) + editor.top
 
 		this.show()
 	}
@@ -188,15 +196,17 @@ class Cursor
 	nextWord()
 	{
 		const text   = this.editor.displayedLine(this.row)
-		const char   = text[this.column]
 		let   column = this.column + 1
-		const skips  = this.skippedLetters(char)
 
-		for (let skip of skips) {
-			while ((column < text.length) && (skip.indexOf(text[column]) > -1)) {
+		if (this.letters.indexOf(text[this.column]) > -1) {
+			while ((column < text.length) && (this.letters.indexOf(text[column]) > -1)) {
 				column ++
 			}
 		}
+		while ((column < text.length) && (this.letters.indexOf(text[column]) < 0)) {
+			column ++
+		}
+
 		if (column > text.length) {
 			this.moveTo(0, this.row + 1)
 		}
@@ -210,19 +220,18 @@ class Cursor
 	 */
 	previousWord()
 	{
-		let   text   = this.editor.displayedLine(this.row)
+		const text   = this.editor.displayedLine(this.row)
 		let   column = this.column - 1
-		const char   = text[column]
-		const skips  = this.skippedLetters(char)
 
-		for (let skip of skips) {
-			while ((column > 0) && (skip.indexOf(text[column - 1]) > -1)) {
-				column --
-			}
+		while ((column > 0) && (this.letters.indexOf(text[column - 1]) < 0)) {
+			column --
 		}
+		while ((column > 0) && (this.letters.indexOf(text[column - 1]) > -1)) {
+			column --
+		}
+
 		if (column < 0) {
-			text = this.editor.displayedLine(this.row - 1)
-			this.moveTo(text.length, this.row - 1)
+			this.moveTo(this.editor.displayedLine(this.row - 1).length, this.row - 1)
 		}
 		else {
 			this.moveTo(column, this.row)
@@ -235,26 +244,6 @@ class Cursor
 	right()
 	{
 		this.move(1, 0)
-	}
-
-	/**
-	 * Which letters are skipped when this character is under the cursor on next / previous word move
-	 *
-	 * @param char string
-	 * @returns string[]
-	 */
-	skippedLetters(char)
-	{
-		if (char === ' ') {
-			return [' ']
-		}
-		if ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(char) > -1) {
-			return ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz']
-		}
-		if ('abcdefghijklmnopqrstuvwxyz'.indexOf(char) > -1) {
-			return ['abcdefghijklmnopqrstuvwxyz']
-		}
-		return []
 	}
 
 	/**

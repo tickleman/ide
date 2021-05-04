@@ -77,26 +77,32 @@ class Code_Editor
 	displayedLine(number)
 	{
 		const line = this.lines[number]
-		return (line === undefined) ? '' : line.replace("\t", this.metrics.tab_string)
+		return (line === undefined) ? '' : line.replace("\t", this.metrics.tab_string).replace("\r", '')
 	}
 
 	draw()
 	{
-		const metrics = this.metrics
-		const paper   = this.paper
-		const pen     = paper.pen
-		pen.fillStyle = this.settings.color.paper
+		const metrics  = this.metrics
+		const paper    = this.paper
+		const pen      = paper.pen
+		const settings = this.settings
+		const margin   = settings.margin
+		pen.fillStyle  = settings.color.paper
 		pen.fillRect(0, 0, paper.width, paper.height)
 
-		pen.fillStyle     = this.settings.color.default
-		pen.font          = this.metrics.font
+		pen.rect(margin.left, margin.top, paper.width - margin.left - margin.right, paper.height - margin.top - margin.bottom)
+		pen.clip()
+		pen.fillStyle     = settings.color.default
+		pen.font          = metrics.font
 		pen.textBaseline  = 'top'
 
+		let height      = paper.height - margin.bottom
+		let left        = margin.left + this.left
 		let line_number = Math.round(this.top / metrics.line_height)
-		let top         = line_number * metrics.line_height - this.top
+		let top         = margin.top + this.top + (line_number * metrics.line_height)
 
-		while ((line_number < this.lines.length) && (top < paper.height)) {
-			pen.fillText(this.displayedLine(line_number), -this.left, top)
+		while ((line_number < this.lines.length) && (top < height)) {
+			pen.fillText(this.displayedLine(line_number), left, top)
 			line_number ++
 			top += metrics.line_height
 		}
