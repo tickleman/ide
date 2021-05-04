@@ -188,9 +188,7 @@ class Cursor
 		this.column = Math.max(0, column)
 		this.row    = Math.max(0, row)
 		this.draw()
-		const left = this.metrics.left + this.editor.left - this.editor.settings.margin.left
-		const top  = this.metrics.top  + this.editor.top - this.editor.settings.margin.top
-		this.editor.view(left, top, left + this.metrics.width, top + this.metrics.height)
+		this.view()
 	}
 
 	/**
@@ -274,6 +272,16 @@ class Cursor
 	up()
 	{
 		this.move(0, -1)
+	}
+
+	/**
+	 * Ensure the cursor is visible. Move the editor is needed.
+	 */
+	view()
+	{
+		const left = this.metrics.left + this.editor.left - this.editor.settings.margin.left
+		const top  = this.metrics.top  + this.editor.top  - this.editor.settings.margin.top
+		this.editor.view(left, top, left + this.metrics.width, top + this.metrics.height)
 	}
 
 }
