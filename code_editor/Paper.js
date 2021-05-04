@@ -34,6 +34,11 @@ class Paper
 	pen
 
 	/**
+	 * @type function
+	 */
+	resize
+
+	/**
 	 * @type number
 	 */
 	width
@@ -50,8 +55,8 @@ class Paper
 		this.pen    = extendPen(canvas.getContext('2d'))
 		this.loadImages(images)
 		document.addEventListener('DOMContentLoaded', () => {
-			window.addEventListener('resize', () => { this.resize() })
-			this.resize()
+			window.addEventListener('resize', () => { this.onResize() })
+			this.onResize()
 		})
 	}
 
@@ -94,12 +99,13 @@ class Paper
 		}
 	}
 
-	resize()
+	onResize()
 	{
 		const size = this.canvas.getBoundingClientRect()
 		this.canvas.height = this.height = size.height
 		this.canvas.width  = this.width  = size.width
-		if (this.draw) this.draw.call(this)
+		if (this.resize) this.resize.call(this)
+		if (this.draw)   this.draw.call(this)
 	}
 
 }

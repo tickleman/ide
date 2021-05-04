@@ -120,8 +120,8 @@ class Cursor
 		const margin  = editor.settings.margin
 
 		metrics.height = editor.metrics.letter_height + 2
-		metrics.left   = margin.left + editor.left + (this.column * (editor.metrics.letter_width + editor.metrics.letter_spacing))
-		metrics.top    = margin.top + editor.top  + (this.row * editor.metrics.line_height)
+		metrics.left   = margin.left + (this.column * (editor.metrics.letter_width + editor.metrics.letter_spacing)) - editor.left
+		metrics.top    = margin.top + (this.row * editor.metrics.line_height) - editor.top
 		metrics.width  = 2
 
 		this.show()
@@ -188,6 +188,9 @@ class Cursor
 		this.column = Math.max(0, column)
 		this.row    = Math.max(0, row)
 		this.draw()
+		const left = this.metrics.left + this.editor.left - this.editor.settings.margin.left
+		const top  = this.metrics.top  + this.editor.top - this.editor.settings.margin.top
+		this.editor.view(left, top, left + this.metrics.width, top + this.metrics.height)
 	}
 
 	/**
