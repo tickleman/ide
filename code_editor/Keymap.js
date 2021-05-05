@@ -7,7 +7,7 @@ class Keymap
 	editor
 
 	/**
-	 * Each key of the keyboard is associated to an action
+	 * Each key of the keyboard is associated to an action, ie a function without argument called from editor
 	 *
 	 * @see Actions.binding
 	 * @type string{}
@@ -50,6 +50,10 @@ class Keymap
 					}
 				}
 				binding ? binding.call() : callable.call(object)
+			}
+			else if (key.length === 1) {
+				this.editor.insert(key)
+				this.editor.cursor.right()
 			}
 		})
 	}

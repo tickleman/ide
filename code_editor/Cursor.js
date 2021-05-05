@@ -149,12 +149,13 @@ class Cursor
 	 */
 	hide()
 	{
-		if (this.visible) {
+		if (this.backup && this.visible) {
 			const metrics = this.metrics
 			this.editor.paper.pen.putImageData(this.backup, metrics.left, metrics.top)
+		}
+		if (this.visible) {
 			this.visible = false
 		}
-
 		this.blink('show')
 	}
 
@@ -262,7 +263,6 @@ class Cursor
 			pen.fillRect(metrics.left, metrics.top, metrics.width, metrics.height)
 			this.visible = true
 		}
-
 		this.blink('hide')
 	}
 

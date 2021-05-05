@@ -108,7 +108,43 @@ class Code_Editor
 			top += metrics.line_height
 		}
 
+		this.cursor.visible = false
 		this.cursor.draw()
+	}
+
+	/**
+	 * Insert text into position
+	 *
+	 * @param text   string
+	 * @param column number
+	 * @param row    number
+	 */
+	insert(text, column, row)
+	{
+		if (column === undefined) column = this.cursor.column
+		if (row    === undefined) row    = this.cursor.row
+		// add lines
+		while (row > this.lines.length) {
+			this.lines.push('')
+		}
+		// add spaces
+		const displayed_line_length = this.displayedLine(this.lines[row]).length
+		if (column > displayed_line_length) {
+			this.lines[row] += ' '.repeat(column - displayed_line_length)
+		}
+		// calculate real position
+		const line      = this.lines[row]
+		const tab_size  = this.settings.tab_size
+		let   tab_count = 0
+		while (((tab_count * tab_size) < column) && (line[tab_count] === "\t")) {
+			tab_count ++
+			column -= tab_size - 1
+		}
+		// write
+		this.lines[row] = line.substr(0, column) + text + line.substr(column)
+		// TODO Optimization : draw only current line : this will really be faster
+		// TODO Optimization : ask for write, but do not write each time : write once then when we have the time to do so
+		this.draw()
 	}
 
 	/**
