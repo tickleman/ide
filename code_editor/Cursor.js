@@ -102,10 +102,12 @@ class Cursor
 
 	/**
 	 * Move the cursor down
+	 *
+	 * @param size number
 	 */
-	down()
+	down(size = 1)
 	{
-		this.move(0, 1)
+		this.move(0, size)
 	}
 
 	/**
@@ -161,10 +163,12 @@ class Cursor
 
 	/**
 	 * Move the cursor left
+	 *
+	 * @param size number
 	 */
-	left()
+	left(size = 1)
 	{
-		this.move(-1, 0)
+		this.move(-size, 0)
 	}
 
 	/**
@@ -186,6 +190,10 @@ class Cursor
 	 */
 	moveTo(column, row)
 	{
+		while ((column < 0) && row) {
+			row --
+			column += this.editor.displayedLine(row).length + 1
+		}
 		this.column = Math.max(0, column)
 		this.row    = Math.max(0, row)
 		this.draw()
@@ -242,10 +250,18 @@ class Cursor
 
 	/**
 	 * Move the cursor right
+	 *
+	 * @param size number
 	 */
-	right()
+	right(size = 1)
 	{
-		this.move(1, 0)
+		this.move(size, 0)
+		if (this.column > this.editor.displayedLine(this.row).length) {
+			this.row ++
+			this.column = 0
+			this.draw()
+			this.view()
+		}
 	}
 
 	/**
@@ -268,10 +284,12 @@ class Cursor
 
 	/**
 	 * Move the cursor up
+	 *
+	 * @param size number
 	 */
-	up()
+	up(size = 1)
 	{
-		this.move(0, -1)
+		this.move(0, -size)
 	}
 
 	/**

@@ -1,5 +1,6 @@
 import Actions  from './Actions.js'
 import Cursor   from './Cursor.js'
+import Edit     from './Edit.js'
 import Keymap   from './Keymap.js'
 import Metrics  from './Metrics.js'
 import Paper    from './Paper.js'
@@ -17,6 +18,11 @@ class Code_Editor
 	 * @type Cursor
 	 */
 	cursor
+
+	/**
+	 * @type Edit
+	 */
+	edit
 
 	/**
 	 * @type Keymap
@@ -54,6 +60,13 @@ class Code_Editor
 	top = 0
 
 	/**
+	 * Set this to true to ask for call to draw() at the end of the current event execution
+	 *
+	 * @type boolean
+	 */
+	will_draw = false
+
+	/**
 	 *
 	 * @param container
 	 */
@@ -69,18 +82,32 @@ class Code_Editor
 		this.paper.resize = () => { this.metrics.calculate() }
 
 		this.actions  = new Actions(this)
-		this.keymap   = new Keymap(this)
-		this.settings = new Settings()
-		this.metrics  = new Metrics(this)
 		this.cursor   = new Cursor(this)
+		this.edit     = new Edit(this)
+		this.keymap   = new Keymap(this)
+		this.metrics  = new Metrics(this)
+		this.settings = new Settings()
 	}
 
-	displayedLine(number)
+	/**
+	 * Calculate the displayed version of the line : tabs are changed into spaces
+	 *
+	 * @param line_or_row number|string the line number into lines, or the text itself
+	 * @returns string the texte of the line, without tabs : they are all changed to spaces
+	 */
+	displayedLine(line_or_row)
 	{
-		const line = this.lines[number]
+		const line = (typeof(line_or_row) === 'string') ? line_or_row : this.lines[line_or_row]
 		return (line === undefined) ? '' : line.replace("\t", this.metrics.tab_string).replace("\r", '')
 	}
 
+	/**
+	 * Fully redraw the editor and cursor
+	 *
+	 * To avoid non-optimized multiple redraws :
+	 * - Avoid calling this directly, prefer :    editor.will_draw = true.
+	 * - Only the event caller should implement : if (editor.will_draw) editor.draw()
+	 */
 	draw()
 	{
 		const metrics  = this.metrics
@@ -97,54 +124,40 @@ class Code_Editor
 		pen.font          = metrics.font
 		pen.textBaseline  = 'top'
 
-		let bottom      = paper.height - margin.bottom
-		let left        = margin.left - this.left
-		let line_number = Math.round(this.top / metrics.line_height)
-		let top         = margin.top + (line_number * metrics.line_height) - this.top
+		let bottom = paper.height - margin.bottom
+		let left   = margin.left - this.left
+		let row    = Math.round(this.top / metrics.line_height)
+		let top    = margin.top + (row * metrics.line_height) - this.top
 
-		while ((line_number < this.lines.length) && (top < bottom)) {
-			pen.fillText(this.displayedLine(line_number), left, top)
-			line_number ++
+		while ((row < this.lines.length) && (top < bottom)) {
+			pen.fillText(this.displayedLine(row), left, top)
+			row ++
 			top += metrics.line_height
 		}
 
 		this.cursor.visible = false
 		this.cursor.draw()
+
+		this.will_draw = false
 	}
 
 	/**
-	 * Insert text into position
+	 * Calculate the column position into a string (or a line), taking account of tabs
 	 *
-	 * @param text   string
-	 * @param column number
-	 * @param row    number
+	 * @param line_or_row number|string the line number into lines, or the text itself
+	 * @param column      number the visible column number, into the line where tabs are changed to spaces
+	 * @returns number the real column number into the string, shifted left depending on how many tabs precede column
 	 */
-	insert(text, column, row)
+	realColumnInLine(line_or_row, column)
 	{
-		if (column === undefined) column = this.cursor.column
-		if (row    === undefined) row    = this.cursor.row
-		// add lines
-		while (row > this.lines.length) {
-			this.lines.push('')
-		}
-		// add spaces
-		const displayed_line_length = this.displayedLine(this.lines[row]).length
-		if (column > displayed_line_length) {
-			this.lines[row] += ' '.repeat(column - displayed_line_length)
-		}
-		// calculate real position
-		const line      = this.lines[row]
+		const line      = (typeof(line_or_row) === 'string') ? line_or_row : this.lines[line_or_row]
 		const tab_size  = this.settings.tab_size
 		let   tab_count = 0
 		while (((tab_count * tab_size) < column) && (line[tab_count] === "\t")) {
 			tab_count ++
 			column -= tab_size - 1
 		}
-		// write
-		this.lines[row] = line.substr(0, column) + text + line.substr(column)
-		// TODO Optimization : draw only current line : this will really be faster
-		// TODO Optimization : ask for write, but do not write each time : write once then when we have the time to do so
-		this.draw()
+		return column
 	}
 
 	/**
@@ -160,25 +173,21 @@ class Code_Editor
 	view(left, top, right, bottom)
 	{
 		const metrics = this.metrics
-		let   redraw  = false
 		if (left < this.left) {
-			this.left = left
-			redraw    = true
+			this.left      = left
+			this.will_draw = true
 		}
 		if (top < this.top) {
-			this.top = top
-			redraw   = true
+			this.top       = top
+			this.will_draw = true
 		}
 		if (right > this.left + metrics.width) {
-			this.left = right - metrics.width
-			redraw    = true
+			this.left      = right - metrics.width
+			this.will_draw = true
 		}
 		if (bottom > this.top + metrics.height) {
-			this.top = bottom - metrics.height
-			redraw   = true
-		}
-		if (redraw) {
-			this.draw()
+			this.top       = bottom - metrics.height
+			this.will_draw = true
 		}
 	}
 

@@ -13,6 +13,9 @@ class Keymap
 	 * @type string{}
 	 */
 	map = {
+
+		// navigate through code
+
 		'ArrowDown':  'cursor.down',
 		'ArrowLeft':  'cursor.left',
 		'ArrowRight': 'cursor.right',
@@ -25,43 +28,54 @@ class Keymap
 
 		'End':  'cursor.endOfLine',
 		'Home': 'cursor.beginOfLine',
-	}
 
-	/**
-	 * Bind keyboard events with actions
-	 */
-	bind()
-	{
-		document.addEventListener('keydown', (event) => {
-			let key = event.key
-			if (event.altKey)  key = 'Alt+'  + key
-			if (event.ctrlKey) key = 'Ctrl+' + key
-			if (this.map.hasOwnProperty(key)) {
-				let binding  = this.editor.actions.binding
-				let callable = this.editor
-				let object   = this.editor
-				for (let action of this.map[key].split('.')) {
-					if (binding !== undefined) {
-						binding = binding[action]
-					}
-					if (callable !== undefined) {
-						object   = callable
-						callable = object[action]
-					}
-				}
-				binding ? binding.call() : callable.call(object)
-			}
-			else if (key.length === 1) {
-				this.editor.insert(key)
-				this.editor.cursor.right()
-			}
-		})
+		// special deletions / inserts
+
+		'Backspace': 'edit.deleteBefore',
+		'Delete':    'edit.deleteAfter',
+		'Ctrl+d':    'edit.deleteLine',
+		'Enter':     'edit.insertLine',
+		'Tab':       'edit.insertTab'
 	}
 
 	constructor(editor)
 	{
 		this.editor = editor
-		this.bind()
+		document.addEventListener('keydown', (event) => {
+			this.keydown(event)
+			if (this.editor.will_draw) this.editor.draw()
+		})
+	}
+
+	/**
+	 * Bind keyboard events with actions
+	 */
+	keydown(event)
+	{
+		const editor = this.editor
+		let key      = event.key
+		if (event.altKey)  key = 'Alt+'  + key
+		if (event.ctrlKey) key = 'Ctrl+' + key
+		if (this.map.hasOwnProperty(key)) {
+			event.preventDefault()
+			let binding  = editor.actions.binding
+			let callable = editor
+			let object   = editor
+			for (let action of this.map[key].split('.')) {
+				if (binding !== undefined) {
+					binding = binding[action]
+				}
+				if (callable !== undefined) {
+					object   = callable
+					callable = object[action]
+				}
+			}
+			binding ? binding.call() : callable.call(object)
+		}
+		else if (key.length === 1) {
+			event.preventDefault()
+			editor.edit.insert(key)
+		}
 	}
 
 }
