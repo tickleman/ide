@@ -9,9 +9,9 @@ class Paper
 	canvas
 
 	/**
-	 * @type function
+	 * @type function[]
 	 */
-	draw
+	draw = []
 
 	/**
 	 * @type number
@@ -34,9 +34,9 @@ class Paper
 	pen
 
 	/**
-	 * @type function
+	 * @type function[]
 	 */
-	resize
+	resize = []
 
 	/**
 	 * @type number
@@ -92,7 +92,7 @@ class Paper
 					counter --
 					if (!counter) {
 						this.imagesLoaded = true
-						if (this.draw) this.draw.call(this)
+						for (let draw of this.draw) draw.call(this)
 					}
 				})
 			}
@@ -104,8 +104,8 @@ class Paper
 		const size = this.canvas.getBoundingClientRect()
 		this.canvas.height = this.height = size.height
 		this.canvas.width  = this.width  = size.width
-		if (this.resize) this.resize.call(this)
-		if (this.draw)   this.draw.call(this)
+		for (let resize of this.resize) resize.call(this)
+		for (let draw   of this.draw)   draw.call(this)
 	}
 
 }

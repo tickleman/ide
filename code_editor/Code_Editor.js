@@ -3,7 +3,6 @@ import Cursor   from './Cursor.js'
 import Edit     from './Edit.js'
 import Keymap   from './Keymap.js'
 import Metrics  from './Metrics.js'
-import Paper    from './Paper.js'
 import Settings from './Settings.js'
 
 class Code_Editor
@@ -68,18 +67,13 @@ class Code_Editor
 
 	/**
 	 *
-	 * @param container
+	 * @param paper Paper
 	 */
-	constructor(container)
+	constructor(paper)
 	{
-		if (container === undefined) {
-			container = document
-		}
-		this.paper = (container === document)
-			? new Paper(container.getElementsByTagName('canvas')[0], container.getElementsByTagName('img'))
-			: new Paper(container.querySelectorAll('canvas')[0], container.querySelectorAll('img'))
-		this.paper.draw   = () => { this.draw() }
-		this.paper.resize = () => { this.metrics.calculate() }
+		this.paper = paper
+		this.paper.draw.push(() => { this.draw() })
+		this.paper.resize.push(() => { this.metrics.calculate() })
 
 		this.actions  = new Actions(this)
 		this.cursor   = new Cursor(this)

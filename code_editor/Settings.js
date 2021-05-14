@@ -26,7 +26,7 @@ class Settings
 	 *
 	 * @type number{}
 	 */
-	margin = { bottom: 4, left: 4, right: 4, top: 4 }
+	margin = { bottom: 4, left: 204, right: 4, top: 4 }
 
 	/**
 	 * @type number
