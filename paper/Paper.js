@@ -1,4 +1,3 @@
-import extendPen from './CanvasRenderingContext2D.js'
 
 class Paper
 {
@@ -52,7 +51,7 @@ class Paper
 		if (canvas === undefined) canvas = document.getElementsByTagName('canvas')[0]
 		if (images === undefined) images = document.getElementsByTagName('img')
 		this.canvas = canvas
-		this.pen    = extendPen(canvas.getContext('2d'))
+		this.pen    = canvas.getContext('2d')
 		this.loadImages(images)
 		document.addEventListener('DOMContentLoaded', () => {
 			window.addEventListener('resize', () => { this.onResize() })
@@ -63,7 +62,7 @@ class Paper
 	example()
 	{
 		// You will need an HTML page with at least a canvas (images are not used here)
-		const paper = new Paper()
+		const paper = new Paper
 		paper.draw = () => {
 			for (let [index, image] of Object.entries(this.images)) {
 				this.pen.drawImage(image, index * 32, index * 32)

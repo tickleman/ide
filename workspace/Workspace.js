@@ -1,4 +1,5 @@
-import Settings from './Settings.js'
+import Local_Storage from './repository/Local_Storage.js'
+import Settings      from './Settings.js'
 
 class Workspace
 {
@@ -7,6 +8,11 @@ class Workspace
 	 * @type Code_Editor
 	 */
 	editor
+
+	/**
+	 * @type string
+	 */
+	name = 'Workspace'
 
 	/**
 	 * @type Paper
@@ -18,11 +24,22 @@ class Workspace
 	 */
 	settings
 
-	constructor(paper, editor)
+	constructor(name, paper, editor)
 	{
 		this.editor   = editor
+		this.name     = name
 		this.paper    = paper
 		this.settings = new Settings
+	}
+
+	serialize(object, key, value)
+	{
+
+	}
+
+	unserialize(object, key, value)
+	{
+
 	}
 
 }

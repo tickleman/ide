@@ -32,7 +32,9 @@
 
 ### Workspaces
 
-- [ ] Workspace storage accounts : local storage (default, choose key, 'ide:workspaces' default), local indexed DB (choose name, 'ide:workspaces' default), cloud (need token)
+- [ ] Workspaces list : local storage (default, choose key, 'ide:workspaces' default)
+- [ ] Workspaces list : local indexed DB (choose name, 'ide:workspaces' default)
+- [ ] Workspaces list : cloud (need token)
 - [ ] Workspace data structure, including files list
 - [ ] New / Load / Save workspace
 - [ ] List available workspaces

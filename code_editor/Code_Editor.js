@@ -80,7 +80,7 @@ class Code_Editor
 		this.edit     = new Edit(this)
 		this.keymap   = new Keymap(this)
 		this.metrics  = new Metrics(this)
-		this.settings = new Settings()
+		this.settings = new Settings
 	}
 
 	/**

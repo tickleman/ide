@@ -32,7 +32,7 @@ class Settings
 	 *
 	 * @type number{}|string{}
 	 */
-	size = { height: 'auto', width: 50 }
+	size = { height: 'auto', width: 200 }
 
 	/**
 	 * The workspace storage information
@@ -41,7 +41,7 @@ class Settings
 	 */
 	storage = {
 		name: 'ide:workspace',
-		type: 'local'
+		type: 'localStorage'
 	}
 
 }
